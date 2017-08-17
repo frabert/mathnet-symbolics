@@ -888,4 +888,52 @@ let ``Exponential notation parsing``() =
     expr3 ==> "-5000000"
     
     let expr4 = Infix.parseOrUndefined "58E-3"
-    expr4 ==> "0.058"   
+    expr4 ==> "0.058"
+
+[<Test>]
+let ``Special angles handling``() =
+    let denominators = [6;4;3;2]
+    sin(zero) ===> "0"
+    sin(pi * 2) ===> "0"
+    sin(pi / 6) ===> "1/2"
+    sin(pi / 4) ===> "(1/2)*2^(2^(-1))"
+    sin(pi / 3) ===> "(1/2)*3^(2^(-1))"
+    sin(pi / 2) ===> "1"
+    List.map (fun x ->
+        sin(negate (pi / x)) --> negate (sin (pi / x))) denominators |> ignore // sin(-x) = -sin(x)
+    List.map (fun x ->
+        sin ((pi / x) + (pi / 2)) --> cos(pi / x)) denominators |> ignore // sin(x + pi/2) = cos(x)
+    List.map (fun x ->
+        sin((pi / x) + pi) --> negate (sin (pi / x))) denominators |> ignore // sin(x + pi) = -sin(x)
+    List.map (fun x ->
+        sin((pi / x) + (2 * pi)) --> sin (pi / x)) denominators |> ignore // sin(x + 2 * pi) = sin(x)
+
+    cos(zero) ===> "1"
+    cos(pi * 2) ===> "1"
+    cos(pi / 6) ===> "(1/2)*3^(2^(-1))"
+    cos(pi / 4) ===> "(1/2)*2^(2^(-1))"
+    cos(pi / 3) ===> "1/2"
+    cos(pi / 2) ===> "0"
+    List.map (fun x ->
+        cos(negate (pi / x)) --> cos (pi / x)) denominators |> ignore // cos(-x) = cos(x)
+    List.map (fun x ->
+        cos ((pi / x) + (pi / 2)) --> negate (sin(pi / x))) denominators |> ignore // cos(x + pi/2) = -sin(x)
+    List.map (fun x ->
+        cos ((pi / x) + pi) --> negate (cos (pi / x))) denominators |> ignore // cos(x + pi) = -cos(x)
+    List.map (fun x ->
+        cos ((pi / x) + (2 * pi)) --> cos (pi / x)) denominators |> ignore // cos(x + 2 * pi) = cos(x)
+
+    tan(zero) ===> "0"
+    tan(pi * 2) ===> "0"
+    tan(pi / 6) ===> "(1/3)*3^(2^(-1))"
+    tan(pi / 4) ===> "1"
+    tan(pi / 3) ===> "3^(2^(-1))"
+    tan(pi / 2) --> Undefined   
+    List.map (fun x ->
+        tan (negate (pi / x)) --> negate (tan (pi / x))) denominators |> ignore // tan(-x) = -tan(x)
+    List.map (fun x ->
+        tan ((pi / x) + (pi / 2)) --> negate (invert (tan(pi / x)))) denominators |> ignore // tan(x + pi/2) = -1/tan(x)
+    List.map (fun x ->
+        tan ((pi / x) + pi) --> tan (pi / x)) denominators |> ignore // tan(x + pi) = tan(x)
+    List.map (fun x ->
+        tan ((pi / x) + (2 * pi)) --> tan (pi / x)) denominators |> ignore // tan(x + 2 * pi) = tan(x)

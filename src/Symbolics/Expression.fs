@@ -334,6 +334,7 @@ module Operators =
     let subtract x y = add x (negate y)
 
     let rec invert = function
+        | Undefined -> undefined
         | Values.Value v -> Values.invert v
         | Product ax -> Product (ax |> List.map invert)
         | Power (r, p) -> pow r (negate p)
@@ -362,19 +363,65 @@ module Operators =
         | x -> Function (Ln, x)
     let log basis x = divide (ln x) (ln basis)
 
-    let sin = function
+    let rec sin = function
         | Zero -> zero
+        | Constant Pi -> zero
         | Number n when n.IsNegative -> negate (Function (Sin, Number -n))
+        | Product ([Number n; Constant Pi]) as p ->
+            let three = sum [one; two]
+            if n >= BigRational.FromInt(2) then sin (multiply (subtract (Number n) two) pi)
+            elif n > BigRational.One then negate (sin (multiply (subtract (Number n) one) pi))
+            elif n > BigRational.FromIntFraction(1,2) then cos (multiply (subtract (Number n) (divide one two)) pi)
+            elif n.IsNegative then negate (sin (negate p))
+            else
+                match int n.Denominator with
+                | 6 when int n.Numerator = 1 -> divide one two
+                | 4 when int n.Numerator = 1 -> divide (sqrt two) two
+                | 3 when int n.Numerator = 1 -> divide (sqrt three) two
+                | 2 when int n.Numerator = 1 -> one
+                | 1 -> zero
+                | _ -> Function (Sin, p)
         | Product ((Number n)::ax) when n.IsNegative -> negate (Function (Sin, multiply (Number -n) (Product ax)))
+        //| Product ((Number n)::(Constant Pi)::ax) -> 
         | x -> Function (Sin, x)
-    let cos = function
+    and cos = function
         | Zero -> one
+        | Constant Pi -> minusOne
         | Number n when n.IsNegative -> Function (Cos, Number -n)
+        | Product ([Number n; Constant Pi]) as p ->
+            let three = sum [one; two]
+            if n >= BigRational.FromInt(2) then cos (multiply (subtract (Number n) two) pi)
+            elif n > BigRational.One then negate (cos (multiply (subtract (Number n) one) pi))
+            elif n > BigRational.FromIntFraction(1,2) then negate (sin (multiply (subtract (Number n) (divide one two)) pi))
+            elif n.IsNegative then cos (negate p)
+            else
+                match int n.Denominator with
+                | 6 when int n.Numerator = 1 -> divide (sqrt three) two
+                | 4 when int n.Numerator = 1 -> divide (sqrt two) two
+                | 3 when int n.Numerator = 1 -> divide one two
+                | 2 when int n.Numerator = 1 -> zero
+                | 1 -> minusOne
+                | _ -> Function (Sin, p)
         | Product ((Number n)::ax) when n.IsNegative -> Function (Cos, multiply (Number -n) (Product ax))
         | x -> Function (Cos, x)
-    let tan = function
+    let rec tan = function
         | Zero -> zero
+        | Constant Pi -> zero
         | Number n when n.IsNegative -> negate (Function (Tan, Number -n))
+        | Product ([Number n; Constant Pi]) as p ->
+            let three = sum [one; two]
+            if n >= BigRational.FromInt(2) then tan (multiply (subtract (Number n) two) pi)
+            elif n > BigRational.One then tan (multiply (subtract (Number n) one) pi)
+            elif n > BigRational.FromIntFraction(1,2) then negate (invert (tan (multiply (subtract (Number n) (divide one two)) pi)))
+            elif n.IsNegative then negate (tan (negate p))
+            else
+                match int n.Denominator with
+                | 6 when int n.Numerator = 1 -> divide (sqrt three) three
+                | 4 when int n.Numerator = 1 -> one
+                | 3 when int n.Numerator = 1 -> sqrt three
+                | 2 when int n.Numerator = 1 -> Undefined
+                | 1 -> zero
+                | _ -> Function (Tan, p)
         | Product ((Number n)::ax) when n.IsNegative -> negate (Function (Tan, multiply (Number -n) (Product ax)))
         | x -> Function (Tan, x)
 

@@ -928,7 +928,7 @@ let ``Special angles handling``() =
     tan(pi / 6) ===> "(1/3)*3^(2^(-1))"
     tan(pi / 4) ===> "1"
     tan(pi / 3) ===> "3^(2^(-1))"
-    tan(pi / 2) --> PositiveInfinity
+    tan(pi / 2) --> ComplexInfinity
     List.map (fun x ->
         tan (negate (pi / x)) --> negate (tan (pi / x))) denominators |> ignore // tan(-x) = -tan(x)
     List.map (fun x ->

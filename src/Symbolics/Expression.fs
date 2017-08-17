@@ -419,7 +419,7 @@ module Operators =
                 | 6 when int n.Numerator = 1 -> divide (sqrt three) three
                 | 4 when int n.Numerator = 1 -> one
                 | 3 when int n.Numerator = 1 -> sqrt three
-                | 2 when int n.Numerator = 1 -> Undefined
+                | 2 when int n.Numerator = 1 -> PositiveInfinity
                 | 1 -> zero
                 | _ -> Function (Tan, p)
         | Product ((Number n)::ax) when n.IsNegative -> negate (Function (Tan, multiply (Number -n) (Product ax)))
